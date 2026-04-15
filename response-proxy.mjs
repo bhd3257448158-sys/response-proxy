@@ -1180,6 +1180,26 @@ const server = http.createServer(async (req, res) => {
       const validToolNames = (body.tools || []).filter((t) => t.type === "function").map((t) => t.name);
       logInfo(`${req.socket.remoteAddress} ${model} | stream=${chatReq.stream} | ${chatReq.messages.length} msgs | ${toolCount} tools`);
 
+      // Warn if model name looks mismatched with the upstream provider
+      if (PROVIDER !== "generic" && PROVIDER !== "ollama") {
+        const providerPrefixes = {
+          deepseek: ["deepseek"],
+          glm: ["glm", "chatglm"],
+          kimi: ["kimi", "moonshot"],
+          qwen: ["qwen", "qwq", "qwen3"],
+          doubao: ["doubao", "doubao-seed", "ark"],
+          minimax: ["minimax", "abab"],
+        };
+        const prefixes = providerPrefixes[PROVIDER];
+        if (prefixes) {
+          const modelLower = model.toLowerCase();
+          const matched = prefixes.some((p) => modelLower.includes(p));
+          if (!matched) {
+            logWarn(`模型名 "${model}" 可能与上游厂商 ${PROVIDER} 不匹配，请检查 Codex CLI 的模型配置`);
+          }
+        }
+      }
+
       if (DEBUG) {
         logInfo("[DEBUG] 转换后的 Chat Completions 请求:");
         logInfo(JSON.stringify(chatReq, null, 2));
