@@ -160,17 +160,9 @@ async function runWizard(presets) {
   const debugInput = (await ask(rl, "是否开启调试模式？(y/N): ")).trim().toLowerCase();
   const enableDebug = debugInput === "y";
 
-  let logFile = "";
-  if (!enableDebug) {
-    const logInput = (await ask(rl, "是否写入日志文件？留空跳过: ")).trim();
-    if (logInput) {
-      logFile = logInput;
-    }
-  } else {
-    // Debug mode defaults to log file
-    const logInput = (await ask(rl, "日志文件路径（默认 proxy.log，留空跳过）: ")).trim();
-    logFile = logInput || "proxy.log";
-  }
+  const defaultLogPath = path.join(process.cwd(), "proxy.log");
+  const logInput = (await ask(rl, `日志文件路径（默认 ${defaultLogPath}，输入 n 跳过）: `)).trim();
+  const logFile = (logInput.toLowerCase() === "n") ? "" : (logInput || defaultLogPath);
 
   rl.close();
 
