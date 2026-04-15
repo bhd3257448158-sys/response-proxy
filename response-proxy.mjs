@@ -19,6 +19,9 @@ import path from "node:path";
 import { StringDecoder } from "node:string_decoder";
 import { execSync } from "node:child_process";
 import { createInterface } from "node:readline";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const VERSION = "1.0.0";
 
@@ -160,7 +163,7 @@ async function runWizard(presets) {
   const debugInput = (await ask(rl, "是否开启调试模式？(y/N): ")).trim().toLowerCase();
   const enableDebug = debugInput === "y";
 
-  const defaultLogPath = path.join(process.cwd(), "proxy.log");
+  const defaultLogPath = path.join(__dirname, "proxy.log");
   const logInput = (await ask(rl, `日志文件路径（默认 ${defaultLogPath}，输入 n 跳过）: `)).trim();
   const logFile = (logInput.toLowerCase() === "n") ? "" : (logInput || defaultLogPath);
 
