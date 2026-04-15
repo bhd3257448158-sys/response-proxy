@@ -400,8 +400,13 @@ const UPSTREAM = (
   resolveUpstream(process.env.UPSTREAM_BASE_URL) ||
   getArgValue("--upstream") ||
   process.env.UPSTREAM_BASE_URL ||
-  "https://open.bigmodel.cn/api/paas/v4"
+  ""
 ).replace(/\/+$/, "");
+
+if (!UPSTREAM) {
+  logError("未指定上游地址。请运行配置向导: node response-proxy.mjs --setup");
+  process.exit(1);
+}
 const DEBUG = process.env.DEBUG === "1" || process.env.DEBUG === "true";
 const LOG_FILE = process.env.LOG_FILE || "";
 const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10 MB
