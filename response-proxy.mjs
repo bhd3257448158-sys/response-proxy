@@ -178,6 +178,8 @@ async function runWizard(presets, { skipContinuePrompt = false, port = 9090 } = 
   }
 
   rl.close();
+  // Keep stdin referenced so Node.js doesn't exit before HTTP server starts
+  process.stdin.resume();
 
   // Write Codex CLI config
   const codexDir = path.join(process.env.HOME || process.env.USERPROFILE || "~", ".codex");
