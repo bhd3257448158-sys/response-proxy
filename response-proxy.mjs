@@ -166,7 +166,7 @@ async function runWizard(presets, { skipContinuePrompt = false, port = 9090 } = 
   const defaultLogPath = path.join(__dirname, "proxy.log");
   let logFile = "";
   while (true) {
-    const logInput = (await ask(rl, `日志文件路径（默认 ${defaultLogPath}，输入 n 跳过）: `)).trim();
+    const logInput = (await ask(rl, `日志文件路径（默认 proxy.log，输入 n 跳过）: `)).trim();
     if (logInput.toLowerCase() === "n") break;
     const resolved = logInput || defaultLogPath;
     const parentDir = path.dirname(resolved);
