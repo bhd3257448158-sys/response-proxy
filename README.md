@@ -108,6 +108,7 @@ codex
 | 智谱 GLM Coding Plan | `GLM-5.1` | 需订阅 Coding Plan，额度更高 |
 | DeepSeek | `deepseek-chat` / `deepseek-reasoner` | 价格便宜 |
 | Kimi | `kimi-k2.5` | 支持超长上下文 |
+| Kimi Coding Plan | `k2p5` | 需订阅 Kimi Coding Plan |
 | 通义千问 | `qwen-max` | 阿里云百炼平台 |
 | 百炼 Coding Plan | `qwen3.6-plus` | 需订阅百炼 Coding Plan |
 | 豆包 | `doubao-seed-1.5` | 火山引擎方舟平台 |
