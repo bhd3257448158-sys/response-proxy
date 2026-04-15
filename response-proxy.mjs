@@ -368,20 +368,21 @@ function saveConfig(config) {
   }
 }
 
-// ── Auto-wizard: if no API key and no upstream specified, run interactive setup ──
+// ── Auto-wizard: if no upstream specified, try saved config or run wizard ──
 
 let wizardUpstream = null;
-if (!process.env.OPENAI_API_KEY && !getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
+if (!getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
   const saved = loadSavedConfig();
   if (saved && saved.apiKey && saved.upstreamURL) {
     // Restore saved config silently
-    process.env.OPENAI_API_KEY = saved.apiKey;
+    if (!process.env.OPENAI_API_KEY) process.env.OPENAI_API_KEY = saved.apiKey;
     if (saved.enableDebug) process.env.DEBUG = "1";
     if (saved.logFile) process.env.LOG_FILE = saved.logFile;
     wizardUpstream = saved.upstreamURL.replace(/\/+$/, "");
     logInfo(`已加载上次配置（厂商: ${saved.providerName || '自定义'}，模型: ${saved.model || '?'}）`);
     logInfo("如需重新配置，请运行: node response-proxy.mjs --setup");
-  } else {
+  } else if (!process.env.OPENAI_API_KEY) {
+    // No saved config and no API key → run wizard
     const result = await runWizard(PRESETS, { port: PORT });
     process.env.OPENAI_API_KEY = result.apiKey;
     if (result.enableDebug) process.env.DEBUG = "1";
@@ -389,6 +390,8 @@ if (!process.env.OPENAI_API_KEY && !getArgValue("--upstream") && !process.env.UP
     wizardUpstream = result.upstreamURL.replace(/\/+$/, "");
     saveConfig(result);
   }
+  // If OPENAI_API_KEY is set but no upstream and no saved config,
+  // fall through to UPSTREAM default (user knows what they're doing)
 }
 
 const UPSTREAM = (
