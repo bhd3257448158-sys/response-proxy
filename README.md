@@ -195,7 +195,6 @@ node response-proxy.mjs [选项]
 
 选项:
   --port <端口>        代理监听端口（默认 9090）
-  --upstream <URL>     上游地址（支持预设名: deepseek, kimi, glm 等）
   --setup              重新配置并启动代理（交互式向导）
   --help, -h           显示帮助
   --version, -v        显示版本
@@ -203,16 +202,17 @@ node response-proxy.mjs [选项]
 
 ## 环境变量
 
+> 以下环境变量仅供高级调试使用，日常使用无需设置。
+
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
 | `PROXY_PORT` | `9090` | 代理监听端口 |
-| `UPSTREAM_BASE_URL` | — | 上游 API 地址（支持预设名） |
 | `DEBUG` | `false` | 设为 `1` 开启调试日志 |
 | `LOG_FILE` | — | 日志文件路径 |
 | `PROVIDER` | 自动检测 | 强制指定厂商：`glm`/`deepseek`/`kimi`/`qwen`/`doubao`/`minimax`/`ollama`/`generic` |
 | `TOOL_CHOICE_STRICT` | `false` | 设为 `1` 保留原始 tool_choice 值（不降级为 auto） |
 
-> API Key 由向导管理，无需手动设置环境变量。
+> API Key 和上游地址由向导自动管理，无需手动设置环境变量。
 
 ---
 
@@ -293,33 +293,7 @@ Codex CLI                        response-proxy                     GLM / DeepSe
 - **推理模式**：自动适配各厂商的思考/推理参数（`thinking`、`enable_thinking`、`reasoning_split` 等）
 - **错误处理**：上游错误格式归一化，正确发送 `response.failed` / `response.incomplete` 事件
 
-### 各厂商自动适配
-
-代理根据 `UPSTREAM_BASE_URL` **自动检测厂商**并适配参数，无需手动配置。
-
-| 适配项 | DeepSeek | GLM | Kimi | 通义千问 | 豆包 | MiniMax |
-|--------|----------|-----|------|---------|------|---------|
-| 推理参数 | `thinking.type` | `thinking.type` | `thinking.type` | `enable_thinking` | `thinking.type`+auto | `reasoning_split` |
-| stream_options | ✅ | ⚠️ 清理 | ✅ | ✅ | ✅ | ✅ |
-| tool_choice: required | ✅ | ⚠️ 降级auto | ⚠️ 降级auto | ⚠️ 降级auto | ✅ | ⚠️ 降级auto |
-| parallel_tool_calls | ⚠️ 删除 | ⚠️ 删除 | ⚠️ 删除 | ⚠️ 删除 | ⚠️ 删除 | ⚠️ 删除 |
-| tools[].strict | ⚠️ 删除 | ⚠️ 删除 | ⚠️ 删除 | ⚠️ 删除 | ⚠️ 删除 | ⚠️ 删除 |
-
-> ⚠️ = 该参数不被对应厂商支持，代理自动清理或降级以避免请求报错。
-
-### 厂商检测规则
-
-| 厂商 | URL 关键词 |
-|------|-----------|
-| 智谱 GLM | `bigmodel.cn` / `z.ai` |
-| DeepSeek | `deepseek` |
-| Kimi | `moonshot.cn` / `kimi` |
-| 通义千问 | `dashscope` / `aliyuncs` |
-| 豆包 (火山引擎) | `volces.com` / `ark.cn-beijing` |
-| MiniMax | `minimax` |
-| Ollama | `localhost` / `127.0.0.1` / `ollama` |
-
-URL 不匹配任何规则时，代理以通用模式运行（原样透传所有参数）。可通过 `PROVIDER` 环境变量强制指定。
+代理根据上游地址**自动检测厂商**并适配参数（推理模式、stream_options、tool_choice 等），无需手动配置。URL 不匹配任何已知厂商时，以通用模式原样透传。
 
 ---
 

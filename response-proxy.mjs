@@ -653,6 +653,26 @@ function convertToolChoice(toolChoice) {
 }
 
 // ── Provider detection & adaptation ───────────────────────────────────────────
+//
+// 各厂商自动适配参考表：
+//
+// | 适配项               | DeepSeek      | GLM           | Kimi          | 通义千问       | 豆包            | MiniMax        |
+// |----------------------|---------------|---------------|---------------|---------------|----------------|----------------|
+// | 推理参数             | thinking.type | thinking.type | thinking.type | enable_thinking| thinking.type+auto | reasoning_split |
+// | stream_options       | ✅            | ⚠️ 清理       | ✅            | ✅            | ✅             | ✅             |
+// | tool_choice: required| ✅            | ⚠️ 降级auto   | ⚠️ 降级auto   | ⚠️ 降级auto   | ✅             | ⚠️ 降级auto    |
+// | parallel_tool_calls  | ⚠️ 删除       | ⚠️ 删除       | ⚠️ 删除       | ⚠️ 删除       | ⚠️ 删除        | ⚠️ 删除        |
+// | tools[].strict       | ⚠️ 删除       | ⚠️ 删除       | ⚠️ 删除       | ⚠️ 删除       | ⚠️ 删除        | ⚠️ 删除        |
+//
+// 厂商检测规则（URL 关键词）：
+//   智谱 GLM:    bigmodel.cn / z.ai
+//   DeepSeek:    deepseek
+//   Kimi:        moonshot.cn / kimi
+//   通义千问:    dashscope / aliyuncs
+//   豆包:        volces.com / ark.cn-beijing
+//   MiniMax:     minimax
+//   Ollama:      localhost / 127.0.0.1 / ollama
+//
 
 /**
  * Detect provider from UPSTREAM_BASE_URL.
