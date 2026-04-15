@@ -388,8 +388,8 @@ if (!getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
     if (saved.enableDebug) process.env.DEBUG = "1";
     if (saved.logFile) process.env.LOG_FILE = saved.logFile;
     wizardUpstream = saved.upstreamURL.replace(/\/+$/, "");
-    logInfo(`已加载上次配置（厂商: ${saved.providerName || '自定义'}，模型: ${saved.model || '?'}）`);
-    logInfo("如需重新配置，请运行: node response-proxy.mjs --setup");
+    console.log(`✅ 已加载上次配置（厂商: ${saved.providerName || '自定义'}，模型: ${saved.model || '?'}）`);
+    console.log("   如需重新配置，请运行: node response-proxy.mjs --setup");
   } else {
     // No saved config → run wizard to collect upstream, model, etc.
     const result = await runWizard(PRESETS, { port: PORT });
@@ -411,13 +411,11 @@ const UPSTREAM = (
 ).replace(/\/+$/, "");
 
 if (!UPSTREAM) {
-  logError("未指定上游地址。请运行配置向导: node response-proxy.mjs --setup");
+  console.error("❌ 未指定上游地址。请运行配置向导: node response-proxy.mjs --setup");
   process.exit(1);
 }
 const DEBUG = process.env.DEBUG === "1" || process.env.DEBUG === "true";
 const LOG_FILE = process.env.LOG_FILE || "";
-const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10 MB
-const UPSTREAM_TIMEOUT = Number(process.env.UPSTREAM_TIMEOUT) || 600_000; // default 600s
 
 // ── Logging ──────────────────────────────────────────────────────────────────
 
@@ -439,6 +437,9 @@ function log(level, parts) {
 function logInfo(...args) { log("INFO", args); }
 function logWarn(...args) { log("WARN", args); }
 function logError(...args) { log("ERROR", args); }
+
+const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10 MB
+const UPSTREAM_TIMEOUT = Number(process.env.UPSTREAM_TIMEOUT) || 600_000; // default 600s
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
