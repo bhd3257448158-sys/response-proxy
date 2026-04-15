@@ -95,17 +95,9 @@ node response-proxy.mjs
 > OPENAI_API_KEY="sk-你的密钥" node response-proxy.mjs --upstream deepseek
 > ```
 
-### 第 3 步：配置 Codex CLI
+### 第 3 步：开始使用
 
 打开一个**新的终端窗口**，运行：
-
-```bash
-node response-proxy.mjs --setup
-```
-
-这会将代理地址写入 Codex CLI 配置（只需运行一次）。
-
-### 第 4 步：开始使用
 
 ```bash
 # 交互模式（像 ChatGPT 一样对话）
