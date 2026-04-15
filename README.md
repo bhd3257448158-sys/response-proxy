@@ -153,6 +153,8 @@ codex exec "用 Python 写一个贪吃蛇游戏" --config model_provider="respon
 
 ## 各厂商一键启动命令
 
+> 以下命令适用于**已有 API Key、想跳过配置向导**的用户。新用户直接运行 `node response-proxy.mjs` 即可。
+
 复制对应命令，替换 API Key 即可使用：
 
 ### DeepSeek（推荐新手）
