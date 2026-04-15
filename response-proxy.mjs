@@ -279,7 +279,7 @@ model = "${model}"
     }
   }
 
-  return { upstreamURL, apiKey, model, enableDebug, logFile };
+  return { upstreamURL, apiKey, model, enableDebug, logFile, providerName: selected.name };
 }
 
 if (args.includes("--setup")) {
@@ -297,7 +297,8 @@ if (args.includes("--setup")) {
     ollama: "http://localhost:11434/v1",
   };
   const setupPort = Number(getArgValue("--port") || process.env.PROXY_PORT || 9090);
-  await runWizard(_PRESETS, { skipContinuePrompt: true, port: setupPort });
+  const setupResult = await runWizard(_PRESETS, { skipContinuePrompt: true, port: setupPort });
+  saveConfig(setupResult);
   process.exit(0);
 }
 
@@ -329,15 +330,50 @@ if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
   process.exit(1);
 }
 
+// ── Saved config ─────────────────────────────────────────────────────────────
+
+const CONFIG_FILE = path.join(process.env.HOME || process.env.USERPROFILE || "~", ".response-proxy.json");
+
+function loadSavedConfig() {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      return JSON.parse(fs.readFileSync(CONFIG_FILE, "utf-8"));
+    }
+  } catch {
+    // Ignore corrupt config
+  }
+  return null;
+}
+
+function saveConfig(config) {
+  try {
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), "utf-8");
+  } catch {
+    // Ignore write failure
+  }
+}
+
 // ── Auto-wizard: if no API key and no upstream specified, run interactive setup ──
 
 let wizardUpstream = null;
 if (!process.env.OPENAI_API_KEY && !getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
-  const result = await runWizard(PRESETS, { port: PORT });
-  process.env.OPENAI_API_KEY = result.apiKey;
-  if (result.enableDebug) process.env.DEBUG = "1";
-  if (result.logFile) process.env.LOG_FILE = result.logFile;
-  wizardUpstream = result.upstreamURL.replace(/\/+$/, "");
+  const saved = loadSavedConfig();
+  if (saved && saved.apiKey && saved.upstreamURL) {
+    // Restore saved config silently
+    process.env.OPENAI_API_KEY = saved.apiKey;
+    if (saved.enableDebug) process.env.DEBUG = "1";
+    if (saved.logFile) process.env.LOG_FILE = saved.logFile;
+    wizardUpstream = saved.upstreamURL.replace(/\/+$/, "");
+    logInfo(`已加载上次配置（厂商: ${saved.providerName || '自定义'}，模型: ${saved.model || '?'}）`);
+    logInfo("如需重新配置，请运行: node response-proxy.mjs --setup");
+  } else {
+    const result = await runWizard(PRESETS, { port: PORT });
+    process.env.OPENAI_API_KEY = result.apiKey;
+    if (result.enableDebug) process.env.DEBUG = "1";
+    if (result.logFile) process.env.LOG_FILE = result.logFile;
+    wizardUpstream = result.upstreamURL.replace(/\/+$/, "");
+    saveConfig(result);
+  }
 }
 
 const UPSTREAM = (
