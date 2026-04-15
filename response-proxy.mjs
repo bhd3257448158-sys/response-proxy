@@ -101,7 +101,7 @@ async function runWizard(presets, { skipContinuePrompt = false, port = 9090 } = 
   // Step 1: Choose provider
   console.log("请选择模型厂商:");
   const providers = [
-    { key: "1", name: "DeepSeek（推荐新手）", preset: "deepseek", defaultModel: "deepseek-chat" },
+    { key: "1", name: "DeepSeek", preset: "deepseek", defaultModel: "deepseek-chat" },
     { key: "2", name: "智谱 GLM", preset: "glm", defaultModel: "GLM-5.1" },
     { key: "3", name: "智谱 GLM Coding Plan", preset: "glmcp", defaultModel: "GLM-5.1" },
     { key: "4", name: "Kimi", preset: "kimi", defaultModel: "kimi-k2.5" },
@@ -322,6 +322,12 @@ model = "${model}"
   return { upstreamURL, apiKey, model, enableDebug, logFile, providerName: selected.name };
 }
 
+// ── Early declarations ───────────────────────────────────────────────────────
+
+let wizardUpstream = null;
+
+// ── --setup mode ────────────────────────────────────────────────────────────
+
 if (args.includes("--setup")) {
   const _PRESETS = {
     glm: "https://open.bigmodel.cn/api/paas/v4",
@@ -339,7 +345,11 @@ if (args.includes("--setup")) {
   const setupPort = Number(getArgValue("--port") || process.env.PROXY_PORT || 9090);
   const setupResult = await runWizard(_PRESETS, { skipContinuePrompt: true, port: setupPort });
   saveConfig(setupResult);
-  process.exit(0);
+  // Don't exit — continue to start the proxy with the new config
+  process.env.OPENAI_API_KEY = setupResult.apiKey;
+  if (setupResult.enableDebug) process.env.DEBUG = "1";
+  if (setupResult.logFile) process.env.LOG_FILE = setupResult.logFile;
+  wizardUpstream = setupResult.upstreamURL.replace(/[`"']/g, "").replace(/\/+$/, "");
 }
 
 // ── Configuration ───────────────────────────────────────────────────────────
@@ -395,7 +405,6 @@ function saveConfig(config) {
 
 // ── Auto-wizard: if no upstream specified, try saved config or run wizard ──
 
-let wizardUpstream = null;
 if (!getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
   const saved = loadSavedConfig();
   if (saved && saved.apiKey && saved.upstreamURL) {
