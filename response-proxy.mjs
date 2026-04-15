@@ -164,8 +164,18 @@ async function runWizard(presets) {
   const enableDebug = debugInput === "y";
 
   const defaultLogPath = path.join(__dirname, "proxy.log");
-  const logInput = (await ask(rl, `日志文件路径（默认 ${defaultLogPath}，输入 n 跳过）: `)).trim();
-  const logFile = (logInput.toLowerCase() === "n") ? "" : (logInput || defaultLogPath);
+  let logFile = "";
+  while (true) {
+    const logInput = (await ask(rl, `日志文件路径（默认 ${defaultLogPath}，输入 n 跳过）: `)).trim();
+    if (logInput.toLowerCase() === "n") break;
+    const resolved = logInput || defaultLogPath;
+    const parentDir = path.dirname(resolved);
+    if (fs.existsSync(parentDir)) {
+      logFile = resolved;
+      break;
+    }
+    console.error(`   ❌ 目录不存在: ${parentDir}，请重新输入`);
+  }
 
   rl.close();
 
