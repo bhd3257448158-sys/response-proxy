@@ -57,7 +57,7 @@ ENVIRONMENT VARIABLES:
   TOOL_CHOICE_STRICT=1  Pass through tool_choice as-is (no downgrade to "auto")
 
 EXAMPLES:
-  # GLM Coding Plan (default)
+  # GLM (default)
   node response-proxy.mjs
 
   # Using presets (short name)
@@ -114,7 +114,7 @@ wire_api = "responses"
       console.log("接下来请：");
       console.log("  1. 设置 API Key:  export OPENAI_API_KEY=你的密钥");
       console.log("  2. 启动代理:      node response-proxy.mjs");
-      console.log("  3. 运行 Codex:    codex -c model_provider=response_proxy");
+      console.log("  3. 运行 Codex:    codex --config model_provider=\"response_proxy\"");
     }
   } catch (err) {
     console.error("❌ 配置写入失败:", err.message);
