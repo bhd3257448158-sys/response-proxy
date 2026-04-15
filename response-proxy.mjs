@@ -1630,7 +1630,7 @@ server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
     logError(`端口 ${PORT} 已被占用。`);
     logError(`解决方法（任选其一）：`);
-    logError(`  1. 使用其他端口:  PROXY_PORT=8080 node response-proxy.mjs`);
+    logError(`  1. 换一个端口:  node response-proxy.mjs --port 8080`);
     logError(`  2. 先结束占用进程，再重新启动`);
     // Try to identify the process occupying the port
     try {
@@ -1648,6 +1648,12 @@ server.on("error", (err) => {
         if (!isWin && output.includes("\n")) {
           const pids = output.split("\n").map(l => l.trim()).filter(Boolean);
           logError(`  一键结束:  kill ${pids.join(" ")}`);
+        } else if (isWin) {
+          // Extract PIDs from netstat output
+          const pids = [...new Set(output.split("\n").map(l => l.trim().split(/\s+/).pop()).filter(p => /^\d+$/.test(p)))];
+          if (pids.length > 0) {
+            logError(`  一键结束:  taskkill /PID ${pids.join(" /PID ")} /F`);
+          }
         }
       }
     } catch {
