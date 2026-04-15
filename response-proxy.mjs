@@ -197,6 +197,7 @@ model = "${model}"
   // Connectivity test
   console.log();
   console.log("正在测试连通性...");
+  let testPassed = false;
   try {
     const url = new URL(upstreamURL + "/chat/completions");
     const testBody = JSON.stringify({
@@ -221,6 +222,7 @@ model = "${model}"
 
     if (res.ok) {
       console.log("✅ 连通性测试通过！上游服务正常");
+      testPassed = true;
     } else {
       const errBody = await res.text().catch(() => "");
       console.error(`❌ 连通性测试失败: HTTP ${res.status}`);
@@ -240,7 +242,19 @@ model = "${model}"
     } else {
       console.error("❌ 连通性测试失败:", err.message);
     }
-    console.log("   代理仍将启动，你可以稍后手动排查");
+  }
+
+  if (!testPassed) {
+    const ask2 = createInterface({ input: process.stdin, output: process.stdout });
+    const answer = await new Promise((resolve) => {
+      ask2.question("是否仍要启动代理？(y/N): ", resolve);
+    });
+    ask2.close();
+
+    if (answer.trim().toLowerCase() !== "y") {
+      console.log("已退出。请修复问题后重新运行。");
+      process.exit(1);
+    }
   }
 
   return { upstreamURL, apiKey, model };
