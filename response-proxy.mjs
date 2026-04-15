@@ -80,49 +80,43 @@ if (args.includes("--version") || args.includes("-v")) {
   process.exit(0);
 }
 
-// ── Auto-setup Codex CLI config (interactive) ────────────────────────────────
+// ── Interactive setup wizard ─────────────────────────────────────────────────
 
 function ask(rl, prompt) {
   return new Promise((resolve) => rl.question(prompt, resolve));
 }
 
-async function runSetup(presets) {
+async function runWizard(presets) {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
 
   console.log();
   console.log("╔══════════════════════════════════════════════════╗");
-  console.log("║     response-proxy 配置向导                     ║");
+  console.log("║     response-proxy 首次配置                     ║");
   console.log("╚══════════════════════════════════════════════════╝");
   console.log();
 
-  // Step 1: API Key
-  const apiKey = await ask(rl, "请输入 API Key: ");
-  if (!apiKey.trim()) {
-    console.error("❌ API Key 不能为空");
-    rl.close();
-    process.exit(1);
-  }
-
-  // Step 2: Choose provider
-  console.log();
+  // Step 1: Choose provider
   console.log("请选择模型厂商:");
   const providers = [
     { key: "1", name: "DeepSeek（推荐新手）", preset: "deepseek", defaultModel: "deepseek-chat" },
-    { key: "2", name: "智谱 GLM（默认）", preset: "glm", defaultModel: "GLM-5.1" },
+    { key: "2", name: "智谱 GLM", preset: "glm", defaultModel: "GLM-5.1" },
     { key: "3", name: "智谱 GLM Coding Plan", preset: "glmcp", defaultModel: "GLM-5.1" },
     { key: "4", name: "Kimi", preset: "kimi", defaultModel: "kimi-k2.5" },
     { key: "5", name: "通义千问", preset: "qwen", defaultModel: "qwen-max" },
-    { key: "6", name: "豆包（火山引擎）", preset: "doubao", defaultModel: "doubao-seed-1.5" },
-    { key: "7", name: "MiniMax", preset: "minimax", defaultModel: "minimax-m2.5" },
-    { key: "8", name: "Ollama（本地，免费）", preset: "ollama", defaultModel: "qwen2.5-coder:7b" },
-    { key: "9", name: "其他（自定义 URL）", preset: null, defaultModel: "" },
+    { key: "6", name: "百炼 Coding Plan", preset: "qwencp", defaultModel: "qwen3.6-plus" },
+    { key: "7", name: "豆包（火山引擎）", preset: "doubao", defaultModel: "doubao-seed-1.5" },
+    { key: "8", name: "方舟 Coding Plan", preset: "doubaocp", defaultModel: "ark-code-latest" },
+    { key: "9", name: "MiniMax", preset: "minimax", defaultModel: "minimax-m2.5" },
+    { key: "a", name: "MiniMax Coding Plan", preset: "minimaxcp", defaultModel: "minimax-m2.7" },
+    { key: "b", name: "Ollama（本地，免费）", preset: "ollama", defaultModel: "qwen2.5-coder:7b" },
+    { key: "c", name: "其他（自定义 URL）", preset: null, defaultModel: "" },
   ];
   for (const p of providers) {
     console.log(`  ${p.key}. ${p.name}`);
   }
 
-  const choice = await ask(rl, "\n请输入编号 (1-9): ");
-  const selected = providers.find((p) => p.key === choice.trim());
+  const choice = await ask(rl, "\n请输入编号: ");
+  const selected = providers.find((p) => p.key === choice.trim().toLowerCase());
   if (!selected) {
     console.error("❌ 无效的选择");
     rl.close();
@@ -141,6 +135,15 @@ async function runSetup(presets) {
     }
   }
 
+  // Step 2: API Key
+  console.log();
+  const apiKey = await ask(rl, "请输入 API Key: ");
+  if (!apiKey.trim()) {
+    console.error("❌ API Key 不能为空");
+    rl.close();
+    process.exit(1);
+  }
+
   // Step 3: Model name
   console.log();
   const defaultModel = selected.defaultModel || "";
@@ -152,21 +155,16 @@ async function runSetup(presets) {
     process.exit(1);
   }
 
-  // Step 4: Port
-  console.log();
-  const portInput = (await ask(rl, "代理端口（默认 9090）: ")).trim();
-  const port = portInput ? Number(portInput) : 9090;
-
   rl.close();
 
-  // Write config
+  // Write Codex CLI config
   const codexDir = path.join(process.env.HOME || process.env.USERPROFILE || "~", ".codex");
   const configFile = path.join(codexDir, "config.toml");
 
   const providerBlock = `
 [model_providers.response_proxy]
 name = "Response Proxy (any Chat Completions backend)"
-base_url = "http://localhost:${port}/v1"
+base_url = "http://localhost:9090/v1"
 env_key = "OPENAI_API_KEY"
 wire_api = "responses"
 model = "${model}"
@@ -176,14 +174,11 @@ model = "${model}"
     if (!fs.existsSync(codexDir)) {
       fs.mkdirSync(codexDir, { recursive: true });
     }
-
     let existing = "";
     if (fs.existsSync(configFile)) {
       existing = fs.readFileSync(configFile, "utf-8");
     }
-
     if (existing.includes("[model_providers.response_proxy]")) {
-      // Replace existing block
       const updated = existing.replace(
         /\[model_providers\.response_proxy\][\s\S]*?(?=\n\[|$)/,
         providerBlock.trimEnd()
@@ -192,42 +187,31 @@ model = "${model}"
     } else {
       fs.appendFileSync(configFile, providerBlock, "utf-8");
     }
-
     console.log();
-    console.log("✅ 配置已写入 " + configFile);
-    console.log();
-    console.log("启动命令:");
-    if (selected.preset) {
-      console.log(`  node response-proxy.mjs --upstream ${selected.preset}`);
-    } else {
-      console.log(`  UPSTREAM_BASE_URL=${upstreamURL} node response-proxy.mjs`);
-    }
-    console.log();
-    console.log("然后运行:");
-    console.log(`  set OPENAI_API_KEY=你的密钥`);
-    console.log(`  node response-proxy.mjs --upstream ${selected.preset}`);
-    console.log(`  codex --config model_provider="response_proxy"`);
+    console.log("✅ Codex CLI 配置已写入 " + configFile);
   } catch (err) {
-    console.error("❌ 配置写入失败:", err.message);
-    process.exit(1);
+    console.error("⚠️  Codex CLI 配置写入失败:", err.message);
+    console.log("   代理仍可正常启动，稍后可手动运行 --setup 配置");
   }
+
+  return { upstreamURL, apiKey, model };
 }
 
 if (args.includes("--setup")) {
-  // PRESETS is defined later, but --setup needs it for display.
-  // We inline the preset URLs here since --setup exits before the server starts.
   const _PRESETS = {
     glm: "https://open.bigmodel.cn/api/paas/v4",
     glmcp: "https://open.bigmodel.cn/api/coding/paas/v4",
     deepseek: "https://api.deepseek.com/v1",
     kimi: "https://api.moonshot.cn/v1",
     qwen: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    qwencp: "https://coding.dashscope.aliyuncs.com/v1",
     doubao: "https://ark.cn-beijing.volces.com/api/v3",
+    doubaocp: "https://ark.cn-beijing.volces.com/api/coding/v3",
     minimax: "https://api.minimax.chat/v1",
+    minimaxcp: "https://api.minimaxi.com/v1",
     ollama: "http://localhost:11434/v1",
   };
-  // Make PRESETS available for runSetup
-  await runSetup(_PRESETS);
+  await runWizard(_PRESETS);
   process.exit(0);
 }
 
@@ -259,6 +243,7 @@ if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
   process.exit(1);
 }
 const UPSTREAM = (
+  wizardUpstream ||
   resolveUpstream(getArgValue("--upstream")) ||
   resolveUpstream(process.env.UPSTREAM_BASE_URL) ||
   getArgValue("--upstream") ||
@@ -267,6 +252,15 @@ const UPSTREAM = (
 ).replace(/\/+$/, "");
 const DEBUG = process.env.DEBUG === "1" || process.env.DEBUG === "true";
 const LOG_FILE = process.env.LOG_FILE || "";
+
+// ── Auto-wizard: if no API key and no upstream specified, run interactive setup ──
+
+let wizardUpstream = null;
+if (!process.env.OPENAI_API_KEY && !getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
+  const result = await runWizard(PRESETS);
+  process.env.OPENAI_API_KEY = result.apiKey;
+  wizardUpstream = result.upstreamURL.replace(/\/+$/, "");
+}
 const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10 MB
 const UPSTREAM_TIMEOUT = Number(process.env.UPSTREAM_TIMEOUT) || 600_000; // default 600s
 
