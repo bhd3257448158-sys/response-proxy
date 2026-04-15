@@ -86,6 +86,8 @@ Invoke-WebRequest -Uri https://raw.githubusercontent.com/bhd3257448158-sys/respo
 
 ### 第 2 步：启动代理
 
+在脚本所在文件夹打开终端，然后运行：
+
 **所有平台通用：**
 ```bash
 node response-proxy.mjs
