@@ -135,7 +135,13 @@ node response-proxy.mjs
 node response-proxy.mjs --setup
 ```
 
-这会自动配置 Codex CLI，你只需要运行一次。
+交互式配置向导会引导你：
+1. 输入 API Key
+2. 选择模型厂商（DeepSeek、GLM、Kimi 等）
+3. 输入模型名称（有默认推荐）
+4. 设置代理端口
+
+配置完成后，按提示启动代理和 Codex CLI 即可。
 
 ### 第 5 步：开始使用
 
