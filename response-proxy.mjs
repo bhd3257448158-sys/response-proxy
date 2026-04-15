@@ -89,7 +89,7 @@ function ask(rl, prompt) {
   return new Promise((resolve) => rl.question(prompt, resolve));
 }
 
-async function runWizard(presets) {
+async function runWizard(presets, { skipContinuePrompt = false, port = 9090 } = {}) {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
 
   console.log();
@@ -186,7 +186,7 @@ async function runWizard(presets) {
   const providerBlock = `
 [model_providers.response_proxy]
 name = "Response Proxy (any Chat Completions backend)"
-base_url = "http://localhost:9090/v1"
+base_url = "http://localhost:${port}/v1"
 env_key = "OPENAI_API_KEY"
 wire_api = "responses"
 model = "${model}"
@@ -266,7 +266,7 @@ model = "${model}"
     }
   }
 
-  if (!testPassed) {
+  if (!testPassed && !skipContinuePrompt) {
     const ask2 = createInterface({ input: process.stdin, output: process.stdout });
     const answer = await new Promise((resolve) => {
       ask2.question("是否仍要启动代理？(y/N): ", resolve);
@@ -296,7 +296,8 @@ if (args.includes("--setup")) {
     minimaxcp: "https://api.minimaxi.com/v1",
     ollama: "http://localhost:11434/v1",
   };
-  await runWizard(_PRESETS);
+  const setupPort = Number(getArgValue("--port") || process.env.PROXY_PORT || 9090);
+  await runWizard(_PRESETS, { skipContinuePrompt: true, port: setupPort });
   process.exit(0);
 }
 
@@ -327,6 +328,18 @@ if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
   logError(`无效的端口号: ${getArgValue("--port") || process.env.PROXY_PORT || 9090}，端口必须是 1-65535 之间的整数`);
   process.exit(1);
 }
+
+// ── Auto-wizard: if no API key and no upstream specified, run interactive setup ──
+
+let wizardUpstream = null;
+if (!process.env.OPENAI_API_KEY && !getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
+  const result = await runWizard(PRESETS, { port: PORT });
+  process.env.OPENAI_API_KEY = result.apiKey;
+  if (result.enableDebug) process.env.DEBUG = "1";
+  if (result.logFile) process.env.LOG_FILE = result.logFile;
+  wizardUpstream = result.upstreamURL.replace(/\/+$/, "");
+}
+
 const UPSTREAM = (
   wizardUpstream ||
   resolveUpstream(getArgValue("--upstream")) ||
@@ -337,17 +350,6 @@ const UPSTREAM = (
 ).replace(/\/+$/, "");
 const DEBUG = process.env.DEBUG === "1" || process.env.DEBUG === "true";
 const LOG_FILE = process.env.LOG_FILE || "";
-
-// ── Auto-wizard: if no API key and no upstream specified, run interactive setup ──
-
-let wizardUpstream = null;
-if (!process.env.OPENAI_API_KEY && !getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
-  const result = await runWizard(PRESETS);
-  process.env.OPENAI_API_KEY = result.apiKey;
-  if (result.enableDebug) process.env.DEBUG = "1";
-  if (result.logFile) process.env.LOG_FILE = result.logFile;
-  wizardUpstream = result.upstreamURL.replace(/\/+$/, "");
-}
 const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10 MB
 const UPSTREAM_TIMEOUT = Number(process.env.UPSTREAM_TIMEOUT) || 600_000; // default 600s
 
