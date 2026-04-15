@@ -194,6 +194,55 @@ model = "${model}"
     console.log("   代理仍可正常启动，稍后可手动运行 --setup 配置");
   }
 
+  // Connectivity test
+  console.log();
+  console.log("正在测试连通性...");
+  try {
+    const url = new URL(upstreamURL + "/chat/completions");
+    const testBody = JSON.stringify({
+      model: model,
+      messages: [{ role: "user", content: "hi" }],
+      max_tokens: 5,
+      stream: false,
+    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: testBody,
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (res.ok) {
+      console.log("✅ 连通性测试通过！上游服务正常");
+    } else {
+      const errBody = await res.text().catch(() => "");
+      console.error(`❌ 连通性测试失败: HTTP ${res.status}`);
+      if (errBody) {
+        try {
+          const errJson = JSON.parse(errBody);
+          console.error(`   ${errJson.error?.message || errBody.slice(0, 200)}`);
+        } catch {
+          console.error(`   ${errBody.slice(0, 200)}`);
+        }
+      }
+      console.log("   请检查 API Key 和模型名称是否正确");
+    }
+  } catch (err) {
+    if (err.name === "AbortError") {
+      console.error("❌ 连通性测试超时（15秒），请检查网络连接");
+    } else {
+      console.error("❌ 连通性测试失败:", err.message);
+    }
+    console.log("   代理仍将启动，你可以稍后手动排查");
+  }
+
   return { upstreamURL, apiKey, model };
 }
 
