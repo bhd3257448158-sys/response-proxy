@@ -219,10 +219,19 @@ model = "${model}"
     let current = fs.readFileSync(configFile, "utf-8");
     if (!current.includes("model_provider =")) {
       fs.writeFileSync(configFile, defaultProviderLine + current, "utf-8");
+      current = defaultProviderLine + current;
     } else {
       // Update existing model_provider to response_proxy
       const updated = current.replace(/^model_provider\s*=\s*".*"/m, 'model_provider = "response_proxy"');
       fs.writeFileSync(configFile, updated, "utf-8");
+      current = updated;
+    }
+
+    // Remove or update top-level model to match provider's model
+    // Codex CLI's top-level "model" overrides the provider's model
+    if (current.match(/^model\s*=\s*"/m)) {
+      current = current.replace(/^model\s*=\s*".*"/m, `model = "${model}"`);
+      fs.writeFileSync(configFile, current, "utf-8");
     }
     console.log();
     console.log("✅ Codex CLI 配置已写入 " + configFile);
