@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org)
 
-> 一个文件，让 Codex CLI 接入任何 Chat Completions 后端 | A single-file proxy that connects Codex CLI to any Chat Completions backend
+> 一个文件，让 Codex CLI 接入任何 Chat Completions 后端
 
 **零依赖 · 通用 · 单文件 Node.js 代理**
 
@@ -13,30 +13,24 @@
 
 - [这是什么？](#这是什么)
 - [前置条件](#前置条件)
-- [快速开始（3 分钟上手）](#快速开始3-分钟上手)
-- [配置文件说明](#配置文件说明)
+- [快速开始](#快速开始)
 - [支持的模型厂商](#支持的模型厂商)
-- [命令行参数](#命令行参数)
 - [常见问题](#常见问题)
-- [工作原理](#工作原理)
-- [API 端点](#api-端点)
-- [特性](#特性)
+- [配置文件说明](#配置文件说明)
+- [命令行参数](#命令行参数)
+- [技术参考](#技术参考)
 - [License](#license)
 
 ---
 
 ## 这是什么？
 
-[Codex CLI](https://github.com/openai/codex) 是 OpenAI 出品的终端 AI 编程助手，但它**只支持 OpenAI 的 API**。如果你想让 Codex CLI 使用国产大模型（DeepSeek、智谱 GLM、Kimi、通义千问、豆包、MiniMax 等），就需要一个"翻译官"——这就是 `response-proxy`。
-
-它做的事情很简单：
+[Codex CLI](https://github.com/openai/codex) 是 OpenAI 出品的终端 AI 编程助手，但它**只支持 OpenAI 的 API**。如果你想让 Codex CLI 使用其他大模型（DeepSeek、智谱 GLM、Kimi、通义千问、豆包、MiniMax，或任何 OpenAI 兼容 API），就需要一个"翻译官"——这就是 `response-proxy`。
 
 ```
 Codex CLI  ──→  response-proxy  ──→  你选择的任何大模型
-(OpenAI格式)     (自动翻译协议)       (国产模型/本地模型)
+(OpenAI格式)     (自动翻译协议)       (任何 Chat Completions 后端)
 ```
-
-**你不需要理解协议转换的细节**，只需要知道：设置好 API Key，启动代理，就能用了。
 
 ---
 
@@ -44,20 +38,15 @@ Codex CLI  ──→  response-proxy  ──→  你选择的任何大模型
 
 你需要安装 **Node.js**（版本 18 或更高）和 **Codex CLI**。
 
-### 检查是否已安装
-
-```bash
-node --version
-```
-
 ### 安装 Node.js
 
-**macOS / Linux：**
+**macOS：**
 ```bash
-# macOS（Homebrew）
 brew install node
+```
 
-# Linux（Ubuntu/Debian）
+**Linux（Ubuntu/Debian）：**
+```bash
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
@@ -70,9 +59,11 @@ sudo apt-get install -y nodejs
 npm install -g @openai/codex
 ```
 
+> macOS 也可使用 `brew install --cask codex` 安装。
+
 ---
 
-## 快速开始（3 分钟上手）
+## 快速开始
 
 ### 第 1 步：下载脚本
 
@@ -109,96 +100,22 @@ codex
 
 ---
 
-## 配置文件说明
-
-代理涉及 3 个配置文件，均由向导自动管理，一般无需手动编辑。
-
-### `~/.codex/config.toml`（Codex CLI 配置）
-
-**路径：** `~/.codex/config.toml`（Windows: `%USERPROFILE%\.codex\config.toml`）
-
-由向导自动写入，告诉 Codex CLI 使用 response-proxy 作为模型提供者：
-
-```toml
-model = "deepseek-chat"
-model_provider = "response_proxy"
-
-[model_providers.response_proxy]
-name = "Response Proxy (any Chat Completions backend)"
-base_url = "http://localhost:9090/v1"
-env_key = "OPENAI_API_KEY"
-wire_api = "responses"
-model = "deepseek-chat"
-```
-
-> ⚠️ 顶层 `model` 必须与 provider 内的 `model` 保持一致，否则会导致模型名不匹配。向导会自动处理这一点。
-
-### `~/.codex/auth.json`（API Key 存储）
-
-**路径：** `~/.codex/auth.json`（Windows: `%USERPROFILE%\.codex\auth.json`）
-
-由向导自动写入，Codex CLI 从此文件读取 API Key：
-
-```json
-{
-  "auth_mode": "apikey",
-  "OPENAI_API_KEY": "sk-你的密钥"
-}
-```
-
-> ⚠️ 切换厂商后必须重新运行 `--setup`，否则 auth.json 中的旧 Key 会导致认证失败。
-
-### `~/.response-proxy.json`（代理配置记忆）
-
-**路径：** `~/.response-proxy.json`（Windows: `%USERPROFILE%\.response-proxy.json`）
-
-由代理自动管理，保存上次向导的配置，下次启动时自动加载：
-
-```json
-{
-  "upstreamURL": "https://api.deepseek.com/v1",
-  "apiKey": "sk-你的密钥",
-  "model": "deepseek-chat",
-  "enableDebug": false,
-  "logFile": "",
-  "providerName": "DeepSeek"
-}
-```
-
-> 如需完全重置配置，删除此文件后重新运行 `node response-proxy.mjs`。
-
----
-
 ## 支持的模型厂商
 
-| 厂商 | UPSTREAM_BASE_URL | 推荐模型 | 说明 |
-|------|-------------------|---------|------|
-| 智谱 GLM | `https://open.bigmodel.cn/api/paas/v4` | `GLM-5.1` | 按 token 计费 |
-| 智谱 GLM Coding Plan | `https://open.bigmodel.cn/api/coding/paas/v4` | `GLM-5.1` | 需订阅 Coding Plan，额度更高 |
-| DeepSeek | `https://api.deepseek.com/v1` | `deepseek-chat` / `deepseek-reasoner` | 价格便宜 |
-| Kimi | `https://api.moonshot.cn/v1` | `kimi-k2.5` | 支持超长上下文 |
-| 通义千问 | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-max` | 阿里云百炼平台 |
-| 百炼 Coding Plan | `https://coding.dashscope.aliyuncs.com/v1` | `qwen3.6-plus` | 需订阅百炼 Coding Plan |
-| 豆包 | `https://ark.cn-beijing.volces.com/api/v3` | `doubao-seed-1.5` | 火山引擎方舟平台 |
-| 豆包 Coding Plan | `https://ark.cn-beijing.volces.com/api/coding/v3` | `ark-code-latest` | 需订阅方舟 Coding Plan |
-| MiniMax | `https://api.minimax.chat/v1` | `minimax-m2.5` | 支持交错思考 |
-| MiniMax Coding Plan | `https://api.minimaxi.com/v1` | `minimax-m2.7` | 需订阅 MiniMax Coding Plan |
-| Ollama | `http://localhost:11434/v1` | 任意本地模型 | **完全免费**，无需 API Key |
-| 其他 | 自定义 | — | 任何 OpenAI 兼容 API |
-
----
-
-## 命令行参数
-
-```bash
-node response-proxy.mjs [选项]
-
-选项:
-  --port <端口>        代理监听端口（默认 9090）
-  --setup              重新配置并启动代理（交互式向导）
-  --help, -h           显示帮助
-  --version, -v        显示版本
-```
+| 厂商 | 推荐模型 | 说明 |
+|------|---------|------|
+| 智谱 GLM | `GLM-5.1` | 按 token 计费 |
+| 智谱 GLM Coding Plan | `GLM-5.1` | 需订阅 Coding Plan，额度更高 |
+| DeepSeek | `deepseek-chat` / `deepseek-reasoner` | 价格便宜 |
+| Kimi | `kimi-k2.5` | 支持超长上下文 |
+| 通义千问 | `qwen-max` | 阿里云百炼平台 |
+| 百炼 Coding Plan | `qwen3.6-plus` | 需订阅百炼 Coding Plan |
+| 豆包 | `doubao-seed-1.5` | 火山引擎方舟平台 |
+| 豆包 Coding Plan | `ark-code-latest` | 需订阅方舟 Coding Plan |
+| MiniMax | `minimax-m2.5` | 支持交错思考 |
+| MiniMax Coding Plan | `minimax-m2.7` | 需订阅 MiniMax Coding Plan |
+| Ollama | 任意本地模型 | **完全免费**，无需 API Key |
+| 其他 | — | 任何 OpenAI 兼容 API |
 
 ---
 
@@ -229,8 +146,6 @@ curl http://localhost:9090/health
 
 ### 端口被占用怎么办？
 
-启动时如果提示端口被占用，代理会自动检测并显示占用进程的 PID：
-
 ```bash
 # 换一个端口
 node response-proxy.mjs --port 8080
@@ -241,8 +156,6 @@ taskkill /PID <PID> /F  # Windows
 ```
 
 ### 如何重置所有配置？
-
-删除代理配置文件后重新运行：
 
 ```bash
 # macOS / Linux
@@ -256,10 +169,86 @@ node response-proxy.mjs --setup
 
 ---
 
-## 工作原理
+## 配置文件说明
+
+代理涉及 3 个配置文件，均由向导自动管理，一般无需手动编辑。
+
+### `~/.codex/config.toml`（Codex CLI 配置）
+
+**路径：** `~/.codex/config.toml`（Windows: `%USERPROFILE%\.codex\config.toml`）
+
+告诉 Codex CLI 使用 response-proxy 作为模型提供者：
+
+```toml
+model = "deepseek-chat"
+model_provider = "response_proxy"
+
+[model_providers.response_proxy]
+name = "Response Proxy (any Chat Completions backend)"
+base_url = "http://localhost:9090/v1"
+env_key = "OPENAI_API_KEY"
+wire_api = "responses"
+model = "deepseek-chat"
+```
+
+> ⚠️ 顶层 `model` 必须与 provider 内的 `model` 保持一致，否则会导致模型名不匹配。向导会自动处理这一点。
+
+### `~/.codex/auth.json`（API Key 存储）
+
+**路径：** `~/.codex/auth.json`（Windows: `%USERPROFILE%\.codex\auth.json`）
+
+Codex CLI 从此文件读取 API Key：
+
+```json
+{
+  "auth_mode": "apikey",
+  "OPENAI_API_KEY": "sk-你的密钥"
+}
+```
+
+> ⚠️ 切换厂商后必须重新运行 `--setup`，否则 auth.json 中的旧 Key 会导致认证失败。
+
+### `~/.response-proxy.json`（代理配置记忆）
+
+**路径：** `~/.response-proxy.json`（Windows: `%USERPROFILE%\.response-proxy.json`）
+
+保存上次向导的配置，下次启动时自动加载：
+
+```json
+{
+  "upstreamURL": "https://api.deepseek.com/v1",
+  "apiKey": "sk-你的密钥",
+  "model": "deepseek-chat",
+  "enableDebug": false,
+  "logFile": "",
+  "providerName": "DeepSeek"
+}
+```
+
+> 如需完全重置配置，删除此文件后重新运行 `node response-proxy.mjs`。
+
+---
+
+## 命令行参数
+
+```bash
+node response-proxy.mjs [选项]
+
+选项:
+  --port <端口>        代理监听端口（默认 9090）
+  --setup              重新配置并启动代理（交互式向导）
+  --help, -h           显示帮助
+  --version, -v        显示版本
+```
+
+---
+
+## 技术参考
+
+### 工作原理
 
 ```
-Codex CLI                        response-proxy                     GLM / DeepSeek / ...
+Codex CLI                        response-proxy                     上游模型
 ┌──────────────┐                 ┌──────────────┐                  ┌──────────────┐
 │              │  Responses API  │              │  Chat Completions│              │
 │  POST        │ ──────────────→ │  协议转换     │ ──────────────→  │              │
@@ -271,7 +260,7 @@ Codex CLI                        response-proxy                     GLM / DeepSe
 └──────────────┘                 └──────────────┘                  └──────────────┘
 ```
 
-代理在 Codex CLI 的 Responses API 和国产模型的 Chat Completions API 之间做协议翻译，包括：
+代理在 Codex CLI 的 Responses API 和上游的 Chat Completions API 之间做协议翻译，包括：
 
 - **请求转换**：`instructions` → system 消息、`input[]` → `messages[]`、工具定义格式转换
 - **响应转换**：Chat Completions 的 SSE 流 → Responses API 的 SSE 事件
@@ -281,9 +270,7 @@ Codex CLI                        response-proxy                     GLM / DeepSe
 
 代理根据上游地址**自动检测厂商**并适配参数（推理模式、stream_options、tool_choice 等），无需手动配置。URL 不匹配任何已知厂商时，以通用模式原样透传。
 
----
-
-## API 端点
+### API 端点
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -291,9 +278,7 @@ Codex CLI                        response-proxy                     GLM / DeepSe
 | `GET` | `/v1/models` | 模型列表（兼容性端点） |
 | `GET` | `/health` | 健康检查 |
 
----
-
-## 特性
+### 特性
 
 - **零依赖** — 纯 Node.js 标准库，无需 `npm install`
 - **单文件** — 一个 `.mjs` 文件，拷贝即用
