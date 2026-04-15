@@ -200,20 +200,6 @@ node response-proxy.mjs [选项]
   --version, -v        显示版本
 ```
 
-## 环境变量
-
-> 以下环境变量仅供高级调试使用，日常使用无需设置。
-
-| 变量 | 默认值 | 说明 |
-|------|--------|------|
-| `PROXY_PORT` | `9090` | 代理监听端口 |
-| `DEBUG` | `false` | 设为 `1` 开启调试日志 |
-| `LOG_FILE` | — | 日志文件路径 |
-| `PROVIDER` | 自动检测 | 强制指定厂商：`glm`/`deepseek`/`kimi`/`qwen`/`doubao`/`minimax`/`ollama`/`generic` |
-| `TOOL_CHOICE_STRICT` | `false` | 设为 `1` 保留原始 tool_choice 值（不降级为 auto） |
-
-> API Key 和上游地址由向导自动管理，无需手动设置环境变量。
-
 ---
 
 ## 常见问题
