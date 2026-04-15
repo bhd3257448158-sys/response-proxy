@@ -100,7 +100,7 @@ node response-proxy.mjs
 ### 第 3 步：开始使用
 
 ```bash
-codex --config model_provider="response_proxy"
+codex
 ```
 
 **搞定！** 🎉

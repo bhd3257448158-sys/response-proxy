@@ -192,6 +192,9 @@ wire_api = "responses"
 model = "${model}"
 `;
 
+  // Set response_proxy as default provider
+  const defaultProviderLine = `model_provider = "response_proxy"\n`;
+
   try {
     if (!fs.existsSync(codexDir)) {
       fs.mkdirSync(codexDir, { recursive: true });
@@ -200,6 +203,8 @@ model = "${model}"
     if (fs.existsSync(configFile)) {
       existing = fs.readFileSync(configFile, "utf-8");
     }
+
+    // Write provider block
     if (existing.includes("[model_providers.response_proxy]")) {
       const updated = existing.replace(
         /\[model_providers\.response_proxy\][\s\S]*?(?=\n\[|$)/,
@@ -208,6 +213,16 @@ model = "${model}"
       fs.writeFileSync(configFile, updated, "utf-8");
     } else {
       fs.appendFileSync(configFile, providerBlock, "utf-8");
+    }
+
+    // Set default model_provider if not already set
+    let current = fs.readFileSync(configFile, "utf-8");
+    if (!current.includes("model_provider =")) {
+      fs.writeFileSync(configFile, defaultProviderLine + current, "utf-8");
+    } else {
+      // Update existing model_provider to response_proxy
+      const updated = current.replace(/^model_provider\s*=\s*".*"/m, 'model_provider = "response_proxy"');
+      fs.writeFileSync(configFile, updated, "utf-8");
     }
     console.log();
     console.log("✅ Codex CLI 配置已写入 " + configFile);
