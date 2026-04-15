@@ -1435,9 +1435,7 @@ const server = http.createServer(async (req, res) => {
         "Content-Length": Buffer.byteLength(chatBody),
       };
 
-      if (req.headers.authorization) {
-        forwardHeaders["Authorization"] = req.headers.authorization;
-      } else if (process.env.OPENAI_API_KEY) {
+      if (process.env.OPENAI_API_KEY) {
         forwardHeaders["Authorization"] = `Bearer ${process.env.OPENAI_API_KEY}`;
       } else {
         logError("请求被拒绝: 未设置 OPENAI_API_KEY 环境变量，且请求未携带 Authorization 头");
