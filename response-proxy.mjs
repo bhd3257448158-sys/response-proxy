@@ -322,6 +322,29 @@ model = "${model}"
   return { upstreamURL, apiKey, model, enableDebug, logFile, providerName: selected.name };
 }
 
+// ── Saved config ─────────────────────────────────────────────────────────────
+
+const CONFIG_FILE = path.join(process.env.HOME || process.env.USERPROFILE || "~", ".response-proxy.json");
+
+function loadSavedConfig() {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      return JSON.parse(fs.readFileSync(CONFIG_FILE, "utf-8"));
+    }
+  } catch {
+    // Ignore corrupt config
+  }
+  return null;
+}
+
+function saveConfig(config) {
+  try {
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), "utf-8");
+  } catch {
+    // Ignore write failure
+  }
+}
+
 // ── Early declarations ───────────────────────────────────────────────────────
 
 let wizardUpstream = null;
@@ -378,29 +401,6 @@ const PORT = Number(getArgValue("--port") || process.env.PROXY_PORT || 9090);
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
   logError(`无效的端口号: ${getArgValue("--port") || process.env.PROXY_PORT || 9090}，端口必须是 1-65535 之间的整数`);
   process.exit(1);
-}
-
-// ── Saved config ─────────────────────────────────────────────────────────────
-
-const CONFIG_FILE = path.join(process.env.HOME || process.env.USERPROFILE || "~", ".response-proxy.json");
-
-function loadSavedConfig() {
-  try {
-    if (fs.existsSync(CONFIG_FILE)) {
-      return JSON.parse(fs.readFileSync(CONFIG_FILE, "utf-8"));
-    }
-  } catch {
-    // Ignore corrupt config
-  }
-  return null;
-}
-
-function saveConfig(config) {
-  try {
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), "utf-8");
-  } catch {
-    // Ignore write failure
-  }
 }
 
 // ── Auto-wizard: if no upstream specified, try saved config or run wizard ──
