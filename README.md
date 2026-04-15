@@ -26,21 +26,18 @@ Codex CLI  ──→  response-proxy  ──→  你选择的任何大模型
 
 ## 前置条件
 
-你需要安装 **Node.js**（版本 18 或更高）。
-
-### 检查是否已安装
-
-```bash
-node --version
-```
-
-如果显示类似 `v18.x.x` 或更高版本，说明已安装，可以跳过下一步。
+你需要安装 **Node.js**（版本 18 或更高）和 **Codex CLI**。
 
 ### 安装 Node.js
 
-**macOS（推荐使用 Homebrew）：**
+**macOS / Linux：**
 ```bash
+# macOS（Homebrew）
 brew install node
+
+# Linux（Ubuntu/Debian）
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
 ```
 
 **Windows：**
@@ -48,17 +45,15 @@ brew install node
 2. 下载 LTS（长期支持）版本
 3. 双击安装，一路"下一步"
 
-**Linux（Ubuntu/Debian）：**
-```bash
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
-```
-
 ### 安装 Codex CLI
 
-如果你还没有安装 Codex CLI：
-
+**macOS / Linux：**
 ```bash
+npm install -g @openai/codex
+```
+
+**Windows（CMD）：**
+```cmd
 npm install -g @openai/codex
 ```
 
@@ -70,7 +65,12 @@ npm install -g @openai/codex
 
 **方式一：命令行下载**
 ```bash
+# macOS / Linux
 curl -O https://raw.githubusercontent.com/bhd3257448158-sys/response-proxy/main/response-proxy.mjs
+```
+```cmd
+:: Windows（PowerShell）
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/bhd3257448158-sys/response-proxy/main/response-proxy.mjs -OutFile response-proxy.mjs
 ```
 
 **方式二：浏览器下载**
@@ -91,8 +91,16 @@ node response-proxy.mjs
 配置完成后代理**自动启动**，无需其他操作！
 
 > 已有 API Key？可以直接指定厂商启动：
+>
+> **macOS / Linux：**
 > ```bash
 > OPENAI_API_KEY="sk-你的密钥" node response-proxy.mjs --upstream deepseek
+> ```
+>
+> **Windows（CMD）：**
+> ```cmd
+> set OPENAI_API_KEY=sk-你的密钥
+> node response-proxy.mjs --upstream deepseek
 > ```
 
 ### 第 3 步：开始使用
@@ -139,79 +147,140 @@ codex exec "用 Python 写一个贪吃蛇游戏" --config model_provider="respon
 
 ### DeepSeek（推荐新手）
 
+**macOS / Linux：**
 ```bash
 export OPENAI_API_KEY="sk-你的密钥"
+node response-proxy.mjs --upstream deepseek
+```
+**Windows（CMD）：**
+```cmd
+set OPENAI_API_KEY=sk-你的密钥
 node response-proxy.mjs --upstream deepseek
 ```
 
 ### 智谱 GLM
 
+**macOS / Linux：**
 ```bash
 export OPENAI_API_KEY="你的密钥"
+node response-proxy.mjs --upstream glm
+```
+**Windows（CMD）：**
+```cmd
+set OPENAI_API_KEY=你的密钥
 node response-proxy.mjs --upstream glm
 ```
 
 ### 智谱 GLM Coding Plan
 
+**macOS / Linux：**
 ```bash
 export OPENAI_API_KEY="你的密钥"
+node response-proxy.mjs --upstream glmcp
+```
+**Windows（CMD）：**
+```cmd
+set OPENAI_API_KEY=你的密钥
 node response-proxy.mjs --upstream glmcp
 ```
 
 ### Kimi
 
+**macOS / Linux：**
 ```bash
 export OPENAI_API_KEY="sk-你的密钥"
+node response-proxy.mjs --upstream kimi
+```
+**Windows（CMD）：**
+```cmd
+set OPENAI_API_KEY=sk-你的密钥
 node response-proxy.mjs --upstream kimi
 ```
 
 ### 通义千问
 
+**macOS / Linux：**
 ```bash
 export OPENAI_API_KEY="sk-你的密钥"
+node response-proxy.mjs --upstream qwen
+```
+**Windows（CMD）：**
+```cmd
+set OPENAI_API_KEY=sk-你的密钥
 node response-proxy.mjs --upstream qwen
 ```
 
 ### 百炼 Coding Plan
 
+**macOS / Linux：**
 ```bash
 # 注意：需要使用 Coding Plan 专属 API Key（sk-sp-xxxxx）
 export OPENAI_API_KEY="sk-sp-你的密钥"
 node response-proxy.mjs --upstream qwencp
 ```
+**Windows（CMD）：**
+```cmd
+:: 注意：需要使用 Coding Plan 专属 API Key（sk-sp-xxxxx）
+set OPENAI_API_KEY=sk-sp-你的密钥
+node response-proxy.mjs --upstream qwencp
+```
 
 ### 豆包（火山引擎）
 
+**macOS / Linux：**
 ```bash
 export OPENAI_API_KEY="你的密钥"
+node response-proxy.mjs --upstream doubao
+```
+**Windows（CMD）：**
+```cmd
+set OPENAI_API_KEY=你的密钥
 node response-proxy.mjs --upstream doubao
 ```
 
 ### 方舟 Coding Plan
 
+**macOS / Linux：**
 ```bash
 export OPENAI_API_KEY="你的密钥"
+node response-proxy.mjs --upstream doubaocp
+```
+**Windows（CMD）：**
+```cmd
+set OPENAI_API_KEY=你的密钥
 node response-proxy.mjs --upstream doubaocp
 ```
 
 ### MiniMax
 
+**macOS / Linux：**
 ```bash
 export OPENAI_API_KEY="你的密钥"
+node response-proxy.mjs --upstream minimax
+```
+**Windows（CMD）：**
+```cmd
+set OPENAI_API_KEY=你的密钥
 node response-proxy.mjs --upstream minimax
 ```
 
 ### MiniMax Coding Plan
 
+**macOS / Linux：**
 ```bash
 export OPENAI_API_KEY="你的密钥"
+node response-proxy.mjs --upstream minimaxcp
+```
+**Windows（CMD）：**
+```cmd
+set OPENAI_API_KEY=你的密钥
 node response-proxy.mjs --upstream minimaxcp
 ```
 
 ### Ollama（本地，免费）
 
 ```bash
-# 无需 API Key
+# macOS / Linux / Windows 均相同，无需 API Key
 node response-proxy.mjs --upstream ollama
 ```
 
@@ -225,7 +294,7 @@ node response-proxy.mjs [选项]
 选项:
   --port <端口>        代理监听端口（默认 9090）
   --upstream <URL>     上游地址（支持预设名: deepseek, kimi, glm 等）
-  --setup              自动配置 Codex CLI
+  --setup              重新配置 Codex CLI（交互式向导）
   --help, -h           显示帮助
   --version, -v        显示版本
 ```
@@ -250,8 +319,14 @@ node response-proxy.mjs [选项]
 
 确保启动代理前设置了 `OPENAI_API_KEY` 环境变量：
 
+**macOS / Linux：**
 ```bash
 export OPENAI_API_KEY="你的密钥"
+node response-proxy.mjs
+```
+**Windows（CMD）：**
+```cmd
+set OPENAI_API_KEY=你的密钥
 node response-proxy.mjs
 ```
 
@@ -267,21 +342,33 @@ API Key 不正确或已过期。请到对应厂商平台检查你的密钥。
 
 部分模型可能不支持 function calling。开启调试模式查看详情：
 
+**macOS / Linux：**
 ```bash
 DEBUG=1 node response-proxy.mjs
+```
+**Windows（CMD）：**
+```cmd
+set DEBUG=1
+node response-proxy.mjs
 ```
 
 ### 如何确认代理正在运行？
 
+**macOS / Linux：**
 ```bash
 curl http://localhost:9090/health
 # 应返回: {"status":"ok","upstream":"https://..."}
+```
+**Windows（CMD）：**
+```cmd
+curl http://localhost:9090/health
 ```
 
 ### 端口被占用怎么办？
 
 启动时如果提示 `端口 9090 已被占用`，代理会自动检测并显示占用进程的 PID，你可以：
 
+**macOS / Linux：**
 ```bash
 # 方法 1：换一个端口
 PROXY_PORT=8080 node response-proxy.mjs
@@ -289,9 +376,19 @@ PROXY_PORT=8080 node response-proxy.mjs
 # 方法 2：结束占用进程（代理会显示具体命令）
 kill <PID>
 ```
+**Windows（CMD）：**
+```cmd
+:: 方法 1：换一个端口
+set PROXY_PORT=8080
+node response-proxy.mjs
+
+:: 方法 2：结束占用进程
+taskkill /PID <PID> /F
+```
 
 ### 如何在后台运行？
 
+**macOS / Linux：**
 ```bash
 # 使用 nohup
 nohup node response-proxy.mjs > proxy.log 2>&1 &
@@ -301,17 +398,30 @@ screen -S proxy
 node response-proxy.mjs
 # 按 Ctrl+A 然后按 D 分离
 ```
+**Windows：** 直接关闭窗口即可，或在 PowerShell 中使用 `Start-Process`。
 
 ### 如何同时使用多个模型？
 
 启动多个代理实例，使用不同端口：
 
+**macOS / Linux：**
 ```bash
 # 终端 1：DeepSeek
 UPSTREAM_BASE_URL=https://api.deepseek.com/v1 PROXY_PORT=9091 node response-proxy.mjs
 
 # 终端 2：GLM
 PROXY_PORT=9092 node response-proxy.mjs
+```
+**Windows（CMD）：**
+```cmd
+:: 终端 1：DeepSeek
+set UPSTREAM_BASE_URL=https://api.deepseek.com/v1
+set PROXY_PORT=9091
+node response-proxy.mjs
+
+:: 终端 2：GLM
+set PROXY_PORT=9092
+node response-proxy.mjs
 ```
 
 然后在 `~/.codex/config.toml` 中配置多个 provider。
