@@ -155,6 +155,23 @@ async function runWizard(presets) {
     process.exit(1);
   }
 
+  // Step 4: Debug and log options
+  console.log();
+  const debugInput = (await ask(rl, "是否开启调试模式？(y/N): ")).trim().toLowerCase();
+  const enableDebug = debugInput === "y";
+
+  let logFile = "";
+  if (!enableDebug) {
+    const logInput = (await ask(rl, "是否写入日志文件？留空跳过: ")).trim();
+    if (logInput) {
+      logFile = logInput;
+    }
+  } else {
+    // Debug mode defaults to log file
+    const logInput = (await ask(rl, "日志文件路径（默认 proxy.log，留空跳过）: ")).trim();
+    logFile = logInput || "proxy.log";
+  }
+
   rl.close();
 
   // Write Codex CLI config
@@ -257,7 +274,7 @@ model = "${model}"
     }
   }
 
-  return { upstreamURL, apiKey, model };
+  return { upstreamURL, apiKey, model, enableDebug, logFile };
 }
 
 if (args.includes("--setup")) {
@@ -322,6 +339,8 @@ let wizardUpstream = null;
 if (!process.env.OPENAI_API_KEY && !getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
   const result = await runWizard(PRESETS);
   process.env.OPENAI_API_KEY = result.apiKey;
+  if (result.enableDebug) process.env.DEBUG = "1";
+  if (result.logFile) process.env.LOG_FILE = result.logFile;
   wizardUpstream = result.upstreamURL.replace(/\/+$/, "");
 }
 const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10 MB
