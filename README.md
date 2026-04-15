@@ -28,6 +28,13 @@ Codex CLI  ──→  response-proxy  ──→  你选择的任何大模型
 
 你需要安装 **Node.js**（版本 18 或更高）和 **Codex CLI**。
 
+### 检查是否已安装
+
+**所有平台通用：**
+```bash
+node --version
+```
+
 ### 安装 Node.js
 
 **macOS / Linux：**
@@ -79,6 +86,7 @@ Invoke-WebRequest -Uri https://raw.githubusercontent.com/bhd3257448158-sys/respo
 
 ### 第 2 步：启动代理
 
+**所有平台通用：**
 ```bash
 node response-proxy.mjs
 ```
@@ -107,6 +115,7 @@ node response-proxy.mjs
 
 打开一个**新的终端窗口**，运行：
 
+**所有平台通用：**
 ```bash
 # 交互模式（像 ChatGPT 一样对话）
 codex --config model_provider="response_proxy"
@@ -279,8 +288,8 @@ node response-proxy.mjs --upstream minimaxcp
 
 ### Ollama（本地，免费）
 
+**所有平台通用（无需 API Key）：**
 ```bash
-# macOS / Linux / Windows 均相同，无需 API Key
 node response-proxy.mjs --upstream ollama
 ```
 
@@ -288,6 +297,7 @@ node response-proxy.mjs --upstream ollama
 
 ## 命令行参数
 
+**所有平台通用：**
 ```bash
 node response-proxy.mjs [选项]
 
