@@ -25,7 +25,7 @@
 
 ## 这是什么？
 
-[Codex CLI](https://github.com/openai/codex) 是 OpenAI 出品的终端 AI 编程助手。从 v0.59 起，Codex CLI 仅支持 OpenAI 的 Responses API，不再兼容 Chat Completions API。如果你想让 Codex CLI 接入其他大模型（DeepSeek、智谱 GLM、Kimi、通义千问、豆包、MiniMax，或任何 OpenAI 兼容 API），就需要一个"翻译官"——这就是 `response-proxy`。
+[Codex CLI](https://github.com/openai/codex) 是 OpenAI 出品的终端 AI 编程助手。从 2026 年 2 月起，Codex CLI 不再支持 Chat Completions API，仅支持 OpenAI 的 Responses API。如果你想让 Codex CLI 接入其他大模型（DeepSeek、智谱 GLM、Kimi、通义千问、豆包、MiniMax，或任何 OpenAI 兼容 API），就需要一个"翻译官"——这就是 `response-proxy`。
 
 ```
 Codex CLI  ──→  response-proxy  ──→  你选择的任何大模型
