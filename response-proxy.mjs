@@ -241,6 +241,16 @@ model = "${model}"
     fs.writeFileSync(configFile, current, "utf-8");
     console.log();
     console.log("✅ Codex CLI 配置已写入 " + configFile);
+
+    // Write auth.json to ensure Codex CLI sends the correct API key
+    const authFile = path.join(codexDir, "auth.json");
+    let authData = {};
+    if (fs.existsSync(authFile)) {
+      try { authData = JSON.parse(fs.readFileSync(authFile, "utf-8")); } catch { /* ignore */ }
+    }
+    authData["OPENAI_API_KEY"] = apiKey;
+    fs.writeFileSync(authFile, JSON.stringify(authData, null, 2), "utf-8");
+    console.log("✅ API Key 已写入 " + authFile);
   } catch (err) {
     console.error("⚠️  Codex CLI 配置写入失败:", err.message);
     console.log("   代理仍可正常启动，稍后可手动运行 --setup 配置");
