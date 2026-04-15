@@ -389,8 +389,8 @@ let wizardUpstream = null;
 if (!getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
   const saved = loadSavedConfig();
   if (saved && saved.apiKey && saved.upstreamURL) {
-    // Restore saved config silently
-    if (!process.env.OPENAI_API_KEY) process.env.OPENAI_API_KEY = saved.apiKey;
+    // Restore saved config silently (always use saved API key to match saved upstream)
+    process.env.OPENAI_API_KEY = saved.apiKey;
     if (saved.enableDebug) process.env.DEBUG = "1";
     if (saved.logFile) process.env.LOG_FILE = saved.logFile;
     wizardUpstream = saved.upstreamURL.replace(/\/+$/, "");
