@@ -1629,8 +1629,8 @@ server.listen(PORT, () => {
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
     logError(`端口 ${PORT} 已被占用。`);
-    logError(`推荐: 换一个端口启动  node response-proxy.mjs --port 8080`);
-    logError(`如需释放端口，占用进程如下:`);
+    logError(`推荐: 结束占用进程后重新启动`);
+    logError(`占用进程如下:`);
     // Try to identify the process occupying the port
     try {
       const isWin = process.platform === "win32";
