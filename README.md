@@ -99,18 +99,8 @@ node response-proxy.mjs
 
 ### 第 3 步：开始使用
 
-打开一个**新的终端窗口**，运行：
-
-**所有平台通用：**
 ```bash
-# 交互模式（像 ChatGPT 一样对话）
 codex --config model_provider="response_proxy"
-
-# 指定模型
-codex --config model_provider="response_proxy" --model deepseek-chat
-
-# 直接执行任务
-codex exec "用 Python 写一个贪吃蛇游戏" --config model_provider="response_proxy" --full-auto
 ```
 
 **搞定！** 🎉
