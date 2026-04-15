@@ -403,7 +403,7 @@ if (!getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
     process.env.OPENAI_API_KEY = saved.apiKey;
     if (saved.enableDebug) process.env.DEBUG = "1";
     if (saved.logFile) process.env.LOG_FILE = saved.logFile;
-    wizardUpstream = saved.upstreamURL.replace(/\/+$/, "");
+    wizardUpstream = saved.upstreamURL.replace(/[`"']/g, "").replace(/\/+$/, "");
     console.log(`✅ 已加载上次配置（厂商: ${saved.providerName || '自定义'}，模型: ${saved.model || '?'}）`);
     console.log("   如需重新配置，请运行: node response-proxy.mjs --setup");
   } else {
@@ -412,7 +412,7 @@ if (!getArgValue("--upstream") && !process.env.UPSTREAM_BASE_URL) {
     if (!process.env.OPENAI_API_KEY) process.env.OPENAI_API_KEY = result.apiKey;
     if (result.enableDebug) process.env.DEBUG = "1";
     if (result.logFile) process.env.LOG_FILE = result.logFile;
-    wizardUpstream = result.upstreamURL.replace(/\/+$/, "");
+    wizardUpstream = result.upstreamURL.replace(/[`"']/g, "").replace(/\/+$/, "");
     saveConfig(result);
   }
 }
