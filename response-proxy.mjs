@@ -399,7 +399,7 @@ function resolveUpstream(raw) {
 
 const PORT = Number(getArgValue("--port") || process.env.PROXY_PORT || 9090);
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
-  logError(`无效的端口号: ${getArgValue("--port") || process.env.PROXY_PORT || 9090}，端口必须是 1-65535 之间的整数`);
+  console.error(`❌ 无效的端口号: ${getArgValue("--port") || process.env.PROXY_PORT || 9090}，端口必须是 1-65535 之间的整数`);
   process.exit(1);
 }
 
