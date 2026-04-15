@@ -155,7 +155,7 @@ const UPSTREAM = (
   resolveUpstream(process.env.UPSTREAM_BASE_URL) ||
   getArgValue("--upstream") ||
   process.env.UPSTREAM_BASE_URL ||
-  "https://open.bigmodel.cn/api/coding/paas/v4"
+  "https://open.bigmodel.cn/api/paas/v4"
 ).replace(/\/+$/, "");
 const DEBUG = process.env.DEBUG === "1" || process.env.DEBUG === "true";
 const LOG_FILE = process.env.LOG_FILE || "";

@@ -68,25 +68,32 @@ npm install -g @openai/codex
 
 ### 第 1 步：下载脚本
 
+**方式一：命令行下载**
 ```bash
 curl -O https://raw.githubusercontent.com/bhd3257448158-sys/response-proxy/main/response-proxy.mjs
 ```
 
-或者直接把 `response-proxy.mjs` 文件下载到任意文件夹。
+**方式二：浏览器下载**
+
+直接访问 https://raw.githubusercontent.com/bhd3257448158-sys/response-proxy/main/response-proxy.mjs ，右键"另存为"即可。
 
 ### 第 2 步：设置 API Key
 
 选择你要使用的模型厂商，获取 API Key，然后设置环境变量：
 
+**macOS / Linux：**
 ```bash
-# DeepSeek（推荐新手，价格便宜）
-export OPENAI_API_KEY="sk-你的DeepSeek密钥"
+export OPENAI_API_KEY="sk-你的密钥"
+```
 
-# 智谱 GLM
-export OPENAI_API_KEY="你的GLM密钥"
+**Windows（PowerShell）：**
+```powershell
+$env:OPENAI_API_KEY="sk-你的密钥"
+```
 
-# Kimi
-export OPENAI_API_KEY="sk-你的Kimi密钥"
+**Windows（CMD）：**
+```cmd
+set OPENAI_API_KEY=sk-你的密钥
 ```
 
 > **去哪里获取 API Key？**
@@ -134,13 +141,13 @@ node response-proxy.mjs --setup
 
 ```bash
 # 交互模式（像 ChatGPT 一样对话）
-codex -c model_provider=response_proxy
+codex --config model_provider="response_proxy"
 
 # 指定模型
-codex -c model_provider=response_proxy -m deepseek-chat
+codex --config model_provider="response_proxy" --model deepseek-chat
 
 # 直接执行任务
-codex exec "用 Python 写一个贪吃蛇游戏" -c model_provider=response_proxy --full-auto
+codex exec "用 Python 写一个贪吃蛇游戏" --config model_provider="response_proxy" --full-auto
 ```
 
 **搞定！** 🎉
@@ -151,8 +158,8 @@ codex exec "用 Python 写一个贪吃蛇游戏" -c model_provider=response_prox
 
 | 厂商 | UPSTREAM_BASE_URL | 推荐模型 | 说明 |
 |------|-------------------|---------|------|
-| 智谱 GLM | `https://open.bigmodel.cn/api/paas/v4` | `GLM-5.1` | 常规 API，按 token 计费 |
-| 智谱 GLM Coding Plan | `https://open.bigmodel.cn/api/coding/paas/v4` | `GLM-5.1` | **默认值**，需订阅 Coding Plan |
+| 智谱 GLM | `https://open.bigmodel.cn/api/paas/v4` | `GLM-5.1` | **默认值**，按 token 计费 |
+| 智谱 GLM Coding Plan | `https://open.bigmodel.cn/api/coding/paas/v4` | `GLM-5.1` | 需订阅 Coding Plan，额度更高 |
 | DeepSeek | `https://api.deepseek.com/v1` | `deepseek-chat` / `deepseek-reasoner` | 价格便宜，推荐新手 |
 | Kimi | `https://api.moonshot.cn/v1` | `kimi-k2.5` | 支持超长上下文 |
 | 通义千问 | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-max` | 阿里云百炼平台 |
@@ -268,7 +275,7 @@ node response-proxy.mjs [选项]
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
 | `PROXY_PORT` | `9090` | 代理监听端口 |
-| `UPSTREAM_BASE_URL` | `https://open.bigmodel.cn/api/coding/paas/v4` | 上游 API 地址（支持预设名） |
+| `UPSTREAM_BASE_URL` | `https://open.bigmodel.cn/api/paas/v4` | 上游 API 地址（支持预设名） |
 | `OPENAI_API_KEY` | — | API 密钥（也支持请求中的 Authorization 头） |
 | `DEBUG` | `false` | 设为 `1` 开启调试日志 |
 | `LOG_FILE` | — | 日志文件路径 |
