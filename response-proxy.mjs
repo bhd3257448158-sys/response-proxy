@@ -231,10 +231,14 @@ model = "${model}"
 
     // Remove or update top-level model to match provider's model
     // Codex CLI's top-level "model" overrides the provider's model
+    current = fs.readFileSync(configFile, "utf-8");
     if (current.match(/^model\s*=\s*"/m)) {
       current = current.replace(/^model\s*=\s*".*"/m, `model = "${model}"`);
-      fs.writeFileSync(configFile, current, "utf-8");
+    } else {
+      // No top-level model, add one
+      current = `model = "${model}"\n` + current;
     }
+    fs.writeFileSync(configFile, current, "utf-8");
     console.log();
     console.log("✅ Codex CLI 配置已写入 " + configFile);
   } catch (err) {
