@@ -449,6 +449,16 @@ const LOG_FILE = process.env.LOG_FILE || "";
 
 let logStream = null;
 if (LOG_FILE) {
+  // Check if log file exists and is too large (> 10 MB), truncate if so
+  const MAX_LOG_SIZE = 10 * 1024 * 1024;
+  try {
+    if (fs.existsSync(LOG_FILE)) {
+      const stat = fs.statSync(LOG_FILE);
+      if (stat.size > MAX_LOG_SIZE) {
+        fs.writeFileSync(LOG_FILE, `--- 日志文件过大，已自动清理 (${new Date().toISOString()}) ---\n`, "utf-8");
+      }
+    }
+  } catch { /* ignore */ }
   logStream = fs.createWriteStream(LOG_FILE, { flags: "a" });
 }
 
@@ -1609,6 +1619,9 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   logInfo(`response-proxy v${VERSION} 已启动 http://localhost:${PORT}`);
   logInfo(`上游地址: ${UPSTREAM}`);
+  if (LOG_FILE) {
+    logInfo(`日志文件: ${LOG_FILE}`);
+  }
   // Detect if using Coding Plan endpoint and hint
   if (UPSTREAM.includes("/coding/")) {
     const provider = detectProvider(UPSTREAM);
